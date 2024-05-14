@@ -1,0 +1,103 @@
+import os
+from tkinter import *
+from tkinter import filedialog, messagebox
+import PyPDF2
+
+def merge_pdfs(input_folder, output_folder, Realfilename):
+    # Create a PDF writer object
+    pdf_writer = PyPDF2.PdfWriter()
+
+    # Iterate through all files in the input folder
+    for filename in os.listdir(input_folder):
+        if filename.endswith('.pdf'):
+            filepath = os.path.join(input_folder, filename)
+            # Open each PDF file and append its pages to the writer object
+            with open(filepath, 'rb') as pdf_file:
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                for page in pdf_reader.pages:
+                    pdf_writer.add_page(page)
+
+    # Write the merged PDF to the output folder
+    with open(os.path.join(output_folder, Realfilename), 'wb') as output_file:
+        pdf_writer.write(output_file)
+    messagebox.showinfo("Success", "PDFs merged successfully!")
+
+def select_input_folder():
+    folder_path = filedialog.askdirectory()
+    input_folder_entry.delete(0, END)
+    input_folder_entry.insert(END, folder_path)
+
+def select_output_folder():
+    folder_path = filedialog.askdirectory()
+    output_folder_entry.delete(0, END)
+    output_folder_entry.insert(END, folder_path)
+
+def merge():
+    input_folder = input_folder_entry.get()
+    output_folder = output_folder_entry.get()
+    Realfilename = filename_entry.get()
+
+    if not input_folder or not output_folder or not Realfilename:
+        messagebox.showerror("Error", "Please select input and output folders and provide a filename.")
+        return
+
+    merge_pdfs(input_folder, output_folder, Realfilename + ".pdf")
+
+# Create the main Tkinter window
+root = Tk()
+root.title("Ahmad PDF Merger")
+
+# Set custom icon for the window
+icon_path = "your_icon.ico"  # Provide the path to your icon file
+if os.path.exists(icon_path):
+    root.iconbitmap(default=icon_path)
+
+# Calculate screen width and height
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# Set window dimensions and position in the middle of the screen
+window_width = 650
+window_height = 320
+x_coordinate = (screen_width - window_width) // 2
+y_coordinate = (screen_height - window_height) // 2
+root.geometry(f"{window_width}x{window_height}+{x_coordinate}+{y_coordinate}")
+
+root.resizable(False, False)  # Prevent window from being resized
+
+# Create a frame for better organization of widgets
+frame = Frame(root, bg="#f0f0f0")
+frame.pack(expand=True, fill=BOTH, padx=20, pady=20)
+
+# Title label
+title_label = Label(frame, text="PDF Merger", font=("Arial", 28, "bold"), bg="#f0f0f0")
+title_label.grid(row=0, column=0, columnspan=3, pady=10)
+
+# Input folder selection
+input_folder_label = Label(frame, text="Input Folder:", font=("Arial", 14), bg="#f0f0f0")
+input_folder_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+input_folder_entry = Entry(frame, width=40, font=("Arial", 12))
+input_folder_entry.grid(row=1, column=1, padx=5, pady=5)
+input_folder_button = Button(frame, text="Browse", command=select_input_folder, font=("Arial", 12), bg="#4CAF50", fg="white", activebackground="#45a049", activeforeground="white", bd=0)
+input_folder_button.grid(row=1, column=2, padx=5, pady=5)
+
+# Output folder selection
+output_folder_label = Label(frame, text="Output Folder:", font=("Arial", 14), bg="#f0f0f0")
+output_folder_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+output_folder_entry = Entry(frame, width=40, font=("Arial", 12))
+output_folder_entry.grid(row=2, column=1, padx=5, pady=5)
+output_folder_button = Button(frame, text="Browse", command=select_output_folder, font=("Arial", 12), bg="#4CAF50", fg="white", activebackground="#45a049", activeforeground="white", bd=0)
+output_folder_button.grid(row=2, column=2, padx=5, pady=5)
+
+# Filename input
+filename_label = Label(frame, text="Filename:", font=("Arial", 14), bg="#f0f0f0")
+filename_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+filename_entry = Entry(frame, width=40, font=("Arial", 12))
+filename_entry.grid(row=3, column=1, padx=5, pady=5)
+
+# Merge button
+merge_button = Button(root, text="Merge PDFs", command=merge, font=("Arial", 14), bg="#4CAF50", fg="white", padx=8, pady=2, bd=0, activebackground="#45a049", activeforeground="white")
+merge_button.pack(pady=12)
+
+# Start the Tkinter event loop
+root.mainloop()
